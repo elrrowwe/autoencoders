@@ -1,18 +1,19 @@
 import torch.nn as nn
-import torch
 from torch.optim.adam import Adam
 import torchvision
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 
-from vanilla_ae import VanillaAutoencoder
-from batch import batch
+from models.vanilla_ae import VanillaAutoencoder
+from utils.batch import batch
 
 
 """
 The training file for the vanilla autoencoder model. 
 Model training and inference are run on CPU. 
 """
+
+# TODO: add model checkpoints, test on more complex data + torchvision transforms
 
 TRAIN_ITERS = 1000
 CHECKPOINT_ITERS = 100
