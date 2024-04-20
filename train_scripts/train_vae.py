@@ -74,3 +74,13 @@ for epoch in range(TRAIN_ITERS):
 # plotting the loss statistics
 plt.plot(losses)
 plt.title(f'The loss statistics for {TRAIN_ITERS} epochs')
+
+# saving the model
+PATH = 'model.pt'
+
+torch.save({
+            'epoch': TRAIN_ITERS,
+            'model_state_dict': vae.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': losses[-1],
+            }, PATH)
