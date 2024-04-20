@@ -20,13 +20,17 @@ class Encoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Linear(inp_dim, hidden_dim), # 28, 128 (DEFAULT VALUES)
 
-            nn.LeakyReLU(0.001),
-
-            nn.Linear(hidden_dim, hidden_dim), # 28, 128
+            nn.Dropout(0.2),
 
             nn.LeakyReLU(0.001),
 
-            nn.Linear(hidden_dim, hidden_dim), # 28, 128
+            nn.Linear(hidden_dim, hidden_dim), # 128, 128
+
+            nn.Dropout(0.2),
+
+            nn.LeakyReLU(0.001),
+
+            nn.Linear(hidden_dim, hidden_dim), # 128, 128
 
             nn.LeakyReLU(0.001)
         )
@@ -59,7 +63,11 @@ class Decoder(nn.Module):
 
             nn.LeakyReLU(0.001),
 
+            nn.Dropout(0.2),
+
             nn.Linear(hidden_dim, hidden_dim),  # 128, 128
+
+            nn.Dropout(0.2),
 
             nn.LeakyReLU(0.001),
 
@@ -87,8 +95,8 @@ class Decoder(nn.Module):
 class VAE(nn.Module):
     def __init__(self, inp_dim: int = 28, hidden_dim: int = 128, latent_dim: int = 512):
         super(VAE, self).__init__()
-        self.encoder = Encoder(28, 128, 512)
-        self.decoder = Decoder(512, 128, 28)
+        self.encoder = Encoder(inp_dim, hidden_dim, latent_dim)
+        self.decoder = Decoder(latent_dim, hidden_dim, inp_dim)
 
     def reparameterization(self, mean, var):
         """
@@ -106,23 +114,22 @@ class VAE(nn.Module):
 
         return z
 
-    def forward(self, inp, return_encoder_output: bool = False):
+    def forward(self, inp, return_encoder_output: bool = True):
         """
         The forward method of the Variational Autoencoder model.
         Returns the reconstructed input, optionally returns the ouput of the encoder (the mean, log variance of distribution q)
         :param inp: vae input;
-        :param return_encoder_output: whether to return mean, log_variance from the encoder; false by default;
+        :param return_encoder_output: whether to return mean, log_variance from the encoder; True by default;
         :return: an image, reconstructed; optionally returns the output of the encoder.
         """
         mean, log_var = self.encoder(inp)
-        var = torch.exp(log_var) # converting the log variance, returned by the encoder, into variance (exponentiating the log)
+        var = torch.exp(0.5 * log_var) # converting the log variance, returned by the encoder, into variance (exponentiating the log)
 
         z = self.reparameterization(mean, var)
 
         out = self.decoder(z)
 
         if return_encoder_output:
-            print(f'log_var: {log_var}, var: {var}')
             return mean, log_var, out
         else:
             return out
