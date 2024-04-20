@@ -13,11 +13,12 @@ The training file for the Variational Autoencoder model.
 Model training and inference are run on GPU. 
 """
 
-TRAIN_ITERS = 2000
-CHECKPOINT_ITERS = 300
+TRAIN_ITERS = 5000
+CHECKPOINT_ITERS = 100
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device: {device}')
+
 
 transform = torchvision.transforms.Compose([
                                torchvision.transforms.ToTensor(),
@@ -29,11 +30,13 @@ transform = torchvision.transforms.Compose([
 mnist_trainset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 mnist_testset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
+
 # initializing the VAE model
 vae = VAE(28, 512, 128).to(device)
 
 # adam optimizer
 optimizer = Adam(params=vae.parameters(), lr=0.0001)
+
 
 # the training loop
 losses = []
@@ -71,9 +74,10 @@ for epoch in range(TRAIN_ITERS):
         vae_loss.backward()
         optimizer.step()
 
+
 # plotting the loss statistics
 plt.plot(losses)
-plt.title(f'The loss statistics for {TRAIN_ITERS} epochs')
+plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
 
 # saving the model
 PATH = 'model.pt'

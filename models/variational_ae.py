@@ -133,3 +133,14 @@ class VAE(nn.Module):
             return mean, log_var, out
         else:
             return out
+
+    def inference(self, inp):
+        """
+        Method for inferencing/testing the model. Essentially "ignores" the encoder part.
+
+        :param inp: some decoder input of appropriate dimensions, e.g. random noise;
+        :return: an image, reconstructed from the input.
+        """
+        out = self.decoder(inp)
+
+        return out
