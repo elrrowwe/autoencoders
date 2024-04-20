@@ -10,9 +10,10 @@ is meant to be run on CPU.
 class VanillaAutoencoder(nn.Module):
     def __init__(self, inp_dim: int = 28, encoder_hidden_dim: int = 128, decoder_output_dim: int = 28):
         """
+        The vanilla autoencoder class, both the encoder and the decoder are MLPs.
 
-        :param encoder_hidden_dim:
-        :param decoder_output_dim:
+        :param encoder_hidden_dim: the hidden dimension of the encoder (at some point, the dimension of the latent space)
+        :param decoder_output_dim: the output dimension of the decoder
         """
         super(VanillaAutoencoder, self).__init__()
 
