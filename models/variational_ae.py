@@ -22,11 +22,11 @@ class Encoder(nn.Module):
 
             nn.LeakyReLU(0.001),
 
-            nn.Linear(inp_dim, hidden_dim), # 28, 128
+            nn.Linear(hidden_dim, hidden_dim), # 28, 128
 
             nn.LeakyReLU(0.001),
 
-            nn.Linear(inp_dim, hidden_dim), # 28, 128
+            nn.Linear(hidden_dim, hidden_dim), # 28, 128
 
             nn.LeakyReLU(0.001)
         )
@@ -82,6 +82,7 @@ class Decoder(nn.Module):
         out = self.decoder(inp)
 
         return out
+
 
 class VAE(nn.Module):
     def __init__(self, inp_dim: int = 28, hidden_dim: int = 128, latent_dim: int = 512):
