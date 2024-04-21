@@ -22,17 +22,17 @@ class Encoder(nn.Module):
 
             nn.Dropout(0.2),
 
-            nn.LeakyReLU(0.001),
+            nn.LeakyReLU(0.2, inplace=True),
 
             nn.Linear(hidden_dim, hidden_dim), # 128, 128
 
             nn.Dropout(0.2),
 
-            nn.LeakyReLU(0.001),
+            nn.LeakyReLU(0.2, inplace=True),
 
             nn.Linear(hidden_dim, hidden_dim), # 128, 128
 
-            nn.LeakyReLU(0.001)
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
         self.q_mean = nn.Linear(hidden_dim, latent_dim) # the mean of distribution q (an approximation of p)
@@ -61,19 +61,19 @@ class Decoder(nn.Module):
         self.decoder = nn.Sequential(
             nn.Linear(latent_dim, hidden_dim), # 512, 128 (DEFAULT ARGUMENTS)
 
-            nn.LeakyReLU(0.001),
+            nn.LeakyReLU(0.2, inplace=True),
 
             nn.Dropout(0.2),
 
             nn.Linear(hidden_dim, hidden_dim),  # 128, 128
 
-            nn.Dropout(0.2),
+            nn.Dropout(0.2, inplace=True),
 
-            nn.LeakyReLU(0.001),
+            nn.LeakyReLU(0.2, inplace=True),
 
             nn.Linear(hidden_dim, hidden_dim), # 128, 128
 
-            nn.LeakyReLU(0.001),
+            nn.LeakyReLU(0.2, inplace=True),
 
             nn.Linear(hidden_dim, output_dim),
 

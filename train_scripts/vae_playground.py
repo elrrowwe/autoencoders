@@ -16,11 +16,15 @@ checkpoint = torch.load('model.pt')
 vae.load_state_dict(checkpoint['model_state_dict'])
 
 # testing the model on random noise
-z = torch.randn((28, 128))
+"""
+The  decoder part of the network should perform well on noise sampled from the normal distiribution,
+since the objective pushes the modelled distribution q to be as close as possible to N(0,I)
+"""
+z = torch.normal((28, 128))
 
 vae.eval()
 out = vae.inference(z)
 
 plt.imshow(out.reshape((28, 28)).cpu().detach().numpy())
-plt.title('The output of the Variational Autoencoder given random noise')
+plt.title('The output of VAE given random noise')
 plt.show()

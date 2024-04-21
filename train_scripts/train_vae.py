@@ -5,13 +5,17 @@ import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 
 from models.variational_ae import VAE
+from models.conv_vae import Encoder
 from utils.kldiv import kldiv_loss
 from utils.batch import batch
+
+
 
 """
 The training file for the Variational Autoencoder model. 
 Model training and inference are run on GPU. 
 """
+
 
 TRAIN_ITERS = 5000
 CHECKPOINT_ITERS = 100
@@ -37,6 +41,9 @@ vae = VAE(28, 512, 128).to(device)
 # adam optimizer
 optimizer = Adam(params=vae.parameters(), lr=0.0001)
 
+encoder = Encoder()
+mean, log_var = encoder(batch(mnist_testset, batch_size=1)[0])
+print(mean.size())
 
 # the training loop
 losses = []
@@ -78,6 +85,7 @@ for epoch in range(TRAIN_ITERS):
 # plotting the loss statistics
 plt.plot(losses)
 plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
+plt.show()
 
 # saving the model
 PATH = 'model.pt'
