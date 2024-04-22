@@ -50,7 +50,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 # the training loop
 losses = []
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, cvae=True)
+    curr_batch = batch(mnist_trainset, 100, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
@@ -62,7 +62,7 @@ for epoch in range(TRAIN_ITERS):
 
         mean, log_var, test_img_decoded = cvae.forward(test_img)
 
-        test_img_decoded = test_img_decoded.cpu().detach().numpy()
+        test_img_decoded = (test_img_decoded.reshape((28, 28)).cpu().detach().numpy())
 
         # plotting the original image
         plt.imshow(test_img.reshape((28, 28)).cpu().numpy())

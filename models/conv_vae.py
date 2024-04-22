@@ -3,6 +3,7 @@ import torch
 
 from utils.unflatten import UnFlatten # for "unflattening" the input to the decoder
 
+
 """
 A convolutional variational autoencoder model.
 Conceptually the same as the vanilla VAE with the linear layers substituted for conv blocks.
@@ -10,8 +11,8 @@ Conceptually the same as the vanilla VAE with the linear layers substituted for 
 
 
 class Encoder(nn.Module):
-    def __init__(self, in_channels: int = 1, out_channels: int = 32, latent_dim: int = 32,
-                 kernel_size: int = 3,stride: int = 1, in_h: int = 28, in_w: int = 28):
+    def __init__(self, in_channels: int = 1, out_channels: int = 32,
+                 kernel_size: int = 3,stride: int = 1):
         """
         The encoder part of the CVAE model.
         Based on the feature maps created by the conv layers,
@@ -19,7 +20,6 @@ class Encoder(nn.Module):
 
         :param in_channels: the number of channels of the input (e.g., 3 in RGB images);
         :param out_channels: the number of output channels of the first conv layer;
-        :param latent_dim: the dimensionality of the latent space, in which the mean, log_variance are encoded;
         :param kernel_size: the size of the conv "filters"/kernels;
         :param stride: the stride in the conv layers;
         """
@@ -40,8 +40,8 @@ class Encoder(nn.Module):
         )
 
         # ((in_h - 1 * (kernel_size - 1) - 1) // stride) + 1 -- the formula for the shape of the output of a conv layer
-        self.q_mean = nn.Linear(22, 29)
-        self.q_log_var = nn.Linear(22, 29)
+        self.q_mean = nn.Linear(22, 22)
+        self.q_log_var = nn.Linear(22, 22)
 
     def forward(self, inp):
         """
@@ -55,8 +55,6 @@ class Encoder(nn.Module):
         mean = self.q_mean(out)
         log_var = self.q_log_var(out)
 
-        print(mean.size())
-
         return mean, log_var
 
 
@@ -68,15 +66,15 @@ class Decoder(nn.Module):
         self.decoder = nn.Sequential(
             # UnFlatten(),
 
-            nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding=1),
+            nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(out_channels, out_channels // 2, kernel_size-1, stride),
+            nn.ConvTranspose2d(out_channels, out_channels // 2, kernel_size, stride),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(out_channels // 2, out_channels_final, kernel_size-1, stride),
+            nn.ConvTranspose2d(out_channels // 2, out_channels_final, kernel_size, stride),
 
             nn.Sigmoid(),
 
@@ -95,7 +93,7 @@ class Decoder(nn.Module):
         """
         out = self.decoder(inp)
 
-        return out.reshape((28, 28))
+        return out.reshape((1, 1, 28, 28))
 
 
 class CVAE(nn.Module):
