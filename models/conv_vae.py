@@ -20,11 +20,13 @@ class Encoder(nn.Module):
 
             nn.Conv2d(out_channels, out_channels * 2, kernel_size, stride),
 
-            nn.Sigmoid()
+            nn.Sigmoid(),
+
+            nn.Flatten()
         )
 
-        self.q_mean = nn.Linear(out_channels // 4, latent_dim)
-        self.q_log_var = nn.Linear(out_channels // 4, latent_dim)
+        self.q_mean = nn.Linear(out_channels // 8, latent_dim)
+        self.q_log_var = nn.Linear(out_channels // 8, latent_dim)
 
     def forward(self, inp):
         """
