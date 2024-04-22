@@ -12,7 +12,7 @@ A file dedicated to whatever I come up with for my VAE implementation: inference
 vae = VAE(28, 512, 128)
 
 # loading the last model checkpoint
-checkpoint = torch.load('model.pt')
+checkpoint = torch.load('../models/model.pt')
 vae.load_state_dict(checkpoint['model_state_dict'])
 
 # testing the model on random noise

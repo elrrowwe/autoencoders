@@ -6,7 +6,7 @@ Utility file implementing a simple batching function for loaded torchvision data
 """
 
 
-def batch(dataset, batch_size: int = 60):
+def batch(dataset, batch_size: int = 60, cvae: bool = False):
     """
     Function to extract a batch from a torchvision dataset
 
@@ -19,9 +19,16 @@ def batch(dataset, batch_size: int = 60):
 
     batch_list = []
 
-    for i in range(batch_size):
-        item = dataset[np.random.randint(0, dataset_length)]
-        if item not in batch_list:
-            batch_list.append(item[0]) # only appending the image; the __get__ method of the MNIST dataset returns both an image and its label
+    if not cvae:
+        for i in range(batch_size):
+            item = dataset[np.random.randint(0, dataset_length)]
+            if item not in batch_list:
+                batch_list.append(item[0]) # only appending the image; the __get__ method of the MNIST dataset returns both an image and its label
+    else:
+        for i in range(batch_size):
+            item = dataset[np.random.randint(0, dataset_length)]
+            if item not in batch_list:
+                batch_list.append(item[0].reshape((1, 1, 28, 28)))
+
 
     return batch_list

@@ -101,7 +101,7 @@ class VAE(nn.Module):
     def reparameterization(self, mean, var):
         """
         The reparameterization trick, commonly used in variational autoencoders.
-        Instead of sampling from N(encoder_mean, encoder_var), we sample noise from the normal distribution,
+        Instead of sampling from N(encoder_mean, encoder_var), we sample noise from the normal distribution N(0, I),
         then multiply the noise by given encoder-generated mean and variance,
         thus allowing for cheaper encoder_mean, encoder_var optimization.
 

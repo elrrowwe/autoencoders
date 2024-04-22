@@ -4,15 +4,19 @@ import torchvision
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 
-from models.variational_ae import VAE
+from models.conv_vae import (
+    Encoder,
+    Decoder,
+    CVAE
+)
 from utils.kldiv import kldiv_loss
 from utils.batch import batch
 
 
-
 """
-The training file for the Variational Autoencoder model. 
-Model training and inference are run on GPU. 
+The training script for the CVAE model. 
+Conceptually the same as the one for the VAE model.
+Is meant to be run on GPU.
 """
 
 
@@ -33,29 +37,32 @@ transform = torchvision.transforms.Compose([
 mnist_trainset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 mnist_testset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
+# initializing the CVAE model (encoder, decoder, CVAE)
+encoder = Encoder()
 
-# initializing the VAE model
-vae = VAE(28, 512, 128).to(device)
+decoder = Decoder()
+
+cvae = CVAE(encoder, decoder).to(device)
 
 # adam optimizer
-optimizer = Adam(params=vae.parameters(), lr=0.0001)
+optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 
 # the training loop
 losses = []
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset)
+    curr_batch = batch(mnist_trainset, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
         print(f'current epoch: {epoch}, average loss: {sum(losses) / len(losses)}')
-        vae.eval()
+        cvae.eval()
 
         # the first image from the test set
-        test_img = batch(mnist_testset, batch_size=1)[0].to(device)
+        test_img = batch(mnist_testset, batch_size=1, cvae=True)[0].to(device)
 
-        mean, log_var, test_img_decoded = vae.forward(test_img)
+        mean, log_var, test_img_decoded = cvae.forward(test_img)
 
-        test_img_decoded = test_img_decoded.reshape((28, 28)).cpu().detach().numpy()
+        test_img_decoded = test_img_decoded.cpu().detach().numpy()
 
         # plotting the original image
         plt.imshow(test_img.reshape((28, 28)).cpu().numpy())
@@ -69,7 +76,7 @@ for epoch in range(TRAIN_ITERS):
 
     for img in curr_batch:
         inp_image = img.to(device)
-        mean, log_var, decoder_output = vae(inp_image)
+        mean, log_var, decoder_output = cvae(inp_image)
 
         vae_loss = kldiv_loss(decoder_output, inp_image, mean, log_var)
         losses.append(vae_loss.item())
@@ -83,11 +90,13 @@ plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
 plt.show()
 
 # saving the model
-PATH = '../models/model.pt'
+PATH = 'cvae_model.pt'
 
 torch.save({
             'epoch': TRAIN_ITERS,
-            'model_state_dict': vae.state_dict(),
+            'model_state_dict': cvae.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': losses[-1],
             }, PATH)
+
+
