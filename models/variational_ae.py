@@ -20,13 +20,13 @@ class Encoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Linear(inp_dim, hidden_dim), # 28, 128 (DEFAULT VALUES)
 
-            nn.Dropout(0.2),
+            # nn.Dropout(0.2),
 
             nn.LeakyReLU(0.2, inplace=True),
 
             nn.Linear(hidden_dim, hidden_dim), # 128, 128
 
-            nn.Dropout(0.2),
+            # nn.Dropout(0.2),
 
             nn.LeakyReLU(0.2, inplace=True),
 
@@ -63,11 +63,11 @@ class Decoder(nn.Module):
 
             nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Dropout(0.2),
+            # nn.Dropout(0.2),
 
             nn.Linear(hidden_dim, hidden_dim),  # 128, 128
 
-            nn.Dropout(0.2, inplace=True),
+            # nn.Dropout(0.2, inplace=True),
 
             nn.LeakyReLU(0.2, inplace=True),
 

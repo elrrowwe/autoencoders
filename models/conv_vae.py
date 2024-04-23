@@ -9,10 +9,12 @@ A convolutional variational autoencoder model.
 Conceptually the same as the vanilla VAE with the linear layers substituted for conv blocks.
 """
 
+# TODO: test batchnorm
+
 
 class Encoder(nn.Module):
-    def __init__(self, in_channels: int = 1, out_channels: int = 32,
-                 kernel_size: int = 3,stride: int = 1):
+    def __init__(self, in_channels: int = 1, out_channels: int = 32, in_shape: int = 28,
+                 kernel_size: int = 3, stride: int = 1):
         """
         The encoder part of the CVAE model.
         Based on the feature maps created by the conv layers,
@@ -36,12 +38,16 @@ class Encoder(nn.Module):
 
             nn.Conv2d(out_channels, out_channels * 2, kernel_size, stride),
 
+            nn.ReLU(True),
+
+            nn.Conv2d(out_channels * 2, out_channels * 4, kernel_size, stride),
+
             nn.Sigmoid(),
         )
 
         # ((in_h - 1 * (kernel_size - 1) - 1) // stride) + 1 -- the formula for the shape of the output of a conv layer
-        self.q_mean = nn.Linear(22, 22)
-        self.q_log_var = nn.Linear(22, 22)
+        self.q_mean = nn.Linear(in_shape - (4 * 2), in_shape - (4 * 2)) # num of convlayers * 2
+        self.q_log_var = nn.Linear(in_shape - (4 * 2), in_shape - (4 * 2)) # num of convlayers * 2
 
     def forward(self, inp):
         """
@@ -59,14 +65,18 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, in_channels: int = 64, out_channels: int = 32,
+    def __init__(self, in_channels: int = 128, out_channels: int = 32,
                  out_channels_final: int = 1, kernel_size: int = 3, stride: int = 1):
         super(Decoder, self).__init__()
 
         self.decoder = nn.Sequential(
             # UnFlatten(),
 
-            nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride),
+            nn.ConvTranspose2d(in_channels, out_channels * 2, kernel_size, stride),
+
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(out_channels * 2, out_channels, kernel_size, stride),
 
             nn.ReLU(),
 
@@ -78,8 +88,6 @@ class Decoder(nn.Module):
 
             nn.Sigmoid(),
 
-            # nn.Flatten()
-
         )
 
     def forward(self, inp):
@@ -87,8 +95,6 @@ class Decoder(nn.Module):
         The forward method of the CVAE decoder.
 
         :param inp: the input tensor;
-        :param height: the height of the output tensor (image);
-        :param width: the width of the output tensor (image);
         :return: an image, reconstructed from some input (noise).
         """
         out = self.decoder(inp)
@@ -142,3 +148,18 @@ class CVAE(nn.Module):
         decoder_out = self.decoder(z)
 
         return mean, log_var,  decoder_out
+
+    def inference(self, z):
+        """
+        Inference method for the CVAE model.
+        Essentially drops the "encoder" part of the network,
+        utilizing just the decoder to reconstruct an image from input noise.
+        (should work, provided that q is close enough to N(0, I))
+        Conceptually the same as that for the vanilla VAE.
+
+        :param z: an input noise tensor, should be sampled from a normal distribution N(0, I)
+        :return: an image reconstructed from input noise
+        """
+        decoder_out = self.decoder(z)
+
+        return decoder_out

@@ -20,7 +20,7 @@ Is meant to be run on GPU.
 """
 
 
-TRAIN_ITERS = 5000
+TRAIN_ITERS = 1000
 CHECKPOINT_ITERS = 100
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -34,8 +34,8 @@ transform = torchvision.transforms.Compose([
                              ])
 
 # loading the MNIST digits dataset; simultaneously separating it into train/test portions
-mnist_trainset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
-mnist_testset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+mnist_trainset = datasets.MNIST(root='./data_mnist', train=True, download=True, transform=transform)
+mnist_testset = datasets.MNIST(root='./data_mnist', train=False, download=True, transform=transform)
 
 # initializing the CVAE model (encoder, decoder, CVAE)
 encoder = Encoder()
@@ -48,9 +48,9 @@ cvae = CVAE(encoder, decoder).to(device)
 optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 
 # the training loop
-losses = []
+losses = [1000] # a silly init value
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, 100, cvae=True)
+    curr_batch = batch(mnist_trainset, batch_size=100, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
@@ -90,7 +90,7 @@ plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
 plt.show()
 
 # saving the model
-PATH = 'cvae_model.pt'
+PATH = '../models/cvae_model.pt'
 
 torch.save({
             'epoch': TRAIN_ITERS,

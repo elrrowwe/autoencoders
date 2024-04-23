@@ -9,7 +9,6 @@ from utils.kldiv import kldiv_loss
 from utils.batch import batch
 
 
-
 """
 The training file for the Variational Autoencoder model. 
 Model training and inference are run on GPU. 
@@ -22,7 +21,6 @@ CHECKPOINT_ITERS = 100
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device: {device}')
 
-
 transform = torchvision.transforms.Compose([
                                torchvision.transforms.ToTensor(),
                                torchvision.transforms.Normalize(
@@ -30,9 +28,8 @@ transform = torchvision.transforms.Compose([
                              ])
 
 # loading the MNIST digits dataset; simultaneously separating it into train/test portions
-mnist_trainset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
-mnist_testset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
-
+mnist_trainset = datasets.FashionMNIST(root='./data_femnist', train=True, download=True, transform=transform)
+mnist_testset = datasets.FashionMNIST(root='./data_fmnist', train=False, download=True, transform=transform)
 
 # initializing the VAE model
 vae = VAE(28, 512, 128).to(device)
@@ -43,7 +40,7 @@ optimizer = Adam(params=vae.parameters(), lr=0.0001)
 # the training loop
 losses = []
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset)
+    curr_batch = batch(mnist_trainset, batch_size=100)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
