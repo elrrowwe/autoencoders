@@ -99,8 +99,6 @@ torch.save({
             'model_state_dict': cvae.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': losses[-1],
-            'mean': cvae.mean,
-            'log_var': cvae.log_var
             }, PATH)
 
 # saving the encoder

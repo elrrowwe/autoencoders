@@ -30,9 +30,13 @@ class Encoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels, out_channels // 2, kernel_size, stride),
 
+            nn.MaxPool2d(kernel_size, stride),
+
             nn.ReLU(True),
 
             nn.Conv2d(out_channels // 2, out_channels, kernel_size, stride),
+
+            nn.MaxPool2d(kernel_size, stride),
 
             nn.ReLU(True),
 
@@ -46,8 +50,8 @@ class Encoder(nn.Module):
         )
 
         # ((in_h - 1 * (kernel_size - 1) - 1) // stride) + 1 -- the formula for the shape of the output of a conv layer
-        self.q_mean = nn.Linear(in_shape - (4 * 2), in_shape - (4 * 2)) # num of convlayers * 2
-        self.q_log_var = nn.Linear(in_shape - (4 * 2), in_shape - (4 * 2)) # num of convlayers * 2
+        self.q_mean = nn.Linear(in_shape - (4 * 2) - (2 * 2), in_shape - (4 * 2) - (2 * 2)) # num of convlayers * 2, num of pooling layers * 2
+        self.q_log_var = nn.Linear(in_shape - (4 * 2) - (2 * 2), in_shape - (4 * 2) - (2 * 2)) # num of convlayers * 2, num of pooling layers * 2
 
     def forward(self, inp):
         """
@@ -66,7 +70,7 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, in_channels: int = 128, out_channels: int = 32,
-                 out_channels_final: int = 1, kernel_size: int = 3, stride: int = 1):
+                 out_channels_final: int = 1, kernel_size: int = 4, stride: int = 1):
         super(Decoder, self).__init__()
 
         self.decoder = nn.Sequential(
@@ -117,9 +121,6 @@ class CVAE(nn.Module):
         self.encoder = encoder
         self.decoder = decoder
 
-        # temporary crutches for model inference on random noise
-        self.mean = None
-        self.log_var = None
 
     def reparameterization(self, mean: torch.Tensor, var: torch.Tensor):
         """
@@ -151,10 +152,6 @@ class CVAE(nn.Module):
         z = self.reparameterization(mean, var)
 
         decoder_out = self.decoder(z)
-
-        # temporary crutches for model inference on random noise
-        self.mean = mean
-        self.log_var = log_var
 
         return mean, log_var,  decoder_out
 
