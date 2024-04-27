@@ -103,7 +103,8 @@ class VAE(nn.Module):
         The reparameterization trick, commonly used in variational autoencoders.
         Instead of sampling from N(encoder_mean, encoder_var), we sample noise from the normal distribution N(0, I),
         then multiply the noise by given encoder-generated mean and variance,
-        thus allowing for cheaper encoder_mean, encoder_var optimization.
+        thus allowing for cheaper encoder_mean, encoder_var optimization and addressing the bottleneck imposed
+        on the network by the random node (sampling from N(encoder_mean, encoder_var) directly).
 
         :param mean: the mean to add to epsilon;
         :param var: the variance by which epsilon is to be multiplied;
