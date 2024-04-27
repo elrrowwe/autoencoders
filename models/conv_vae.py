@@ -117,6 +117,10 @@ class CVAE(nn.Module):
         self.encoder = encoder
         self.decoder = decoder
 
+        # temporary crutches for model inference on random noise
+        self.mean = None
+        self.log_var = None
+
     def reparameterization(self, mean: torch.Tensor, var: torch.Tensor):
         """
         The reparameterization trick, commonly used in variational autoencoders.
@@ -146,6 +150,10 @@ class CVAE(nn.Module):
         z = self.reparameterization(mean, var)
 
         decoder_out = self.decoder(z)
+
+        # temporary crutches for model inference on random noise
+        self.mean = mean
+        self.log_var = log_var
 
         return mean, log_var,  decoder_out
 

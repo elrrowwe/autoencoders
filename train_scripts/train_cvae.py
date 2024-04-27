@@ -20,7 +20,7 @@ Is meant to be run on GPU.
 """
 
 
-TRAIN_ITERS = 1000
+TRAIN_ITERS = 100
 CHECKPOINT_ITERS = 100
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -91,12 +91,28 @@ plt.show()
 
 # saving the model
 PATH = '../models/cvae_model.pt'
+PATH_encoder = '../models/encoder_model.pt'
+PATH_decoder = '../models/decoder_model.pt'
 
 torch.save({
             'epoch': TRAIN_ITERS,
             'model_state_dict': cvae.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': losses[-1],
+            'mean': cvae.mean,
+            'log_var': cvae.log_var
             }, PATH)
 
+# saving the encoder
+torch.save({
+    'epoch': TRAIN_ITERS,
+    'model_state_dict': encoder.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict()
+}, PATH_encoder)
 
+# saving the decoder
+torch.save({
+    'epoch': TRAIN_ITERS,
+    'model_state_dict': decoder.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict()
+}, PATH_decoder)
