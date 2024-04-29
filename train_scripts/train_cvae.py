@@ -20,10 +20,11 @@ Is meant to be run on GPU.
 """
 
 
-TRAIN_ITERS = 100
-CHECKPOINT_ITERS = 100
+TRAIN_ITERS = 200
+CHECKPOINT_ITERS = 10
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = 'cpu'
 print(f'device: {device}')
 
 
