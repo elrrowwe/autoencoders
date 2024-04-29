@@ -46,8 +46,6 @@ class Encoder(nn.Module):
 
             nn.Conv2d(out_channels * 2, out_channels * 4, kernel_size, stride),
 
-            nn.ReLU(True),
-
             nn.Sigmoid(),
         )
 
