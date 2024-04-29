@@ -25,8 +25,8 @@ Is meant to be run on GPU.
 TRAIN_ITERS = 200
 CHECKPOINT_ITERS = 10
 
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-device = 'cpu'
+device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = 'cpu'
 print(f'device: {device}')
 
 
@@ -57,7 +57,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 losses = [1000] # a silly init value
 val_losses = [1000]
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, batch_size=100, cvae=True)
+    curr_batch = batch(mnist_trainset, batch_size=200, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
@@ -85,9 +85,9 @@ for epoch in range(TRAIN_ITERS):
         inp_image = img.to(device)
         mean, log_var, decoder_output = cvae(inp_image)
 
-        vae_loss = kldiv_loss(decoder_output, inp_image, mean, log_var)
-        losses.append(vae_loss.item())
-        vae_loss.backward()
+        cvae_loss = kldiv_loss(decoder_output, inp_image, mean, log_var)
+        losses.append(cvae_loss.item())
+        cvae_loss.backward()
         optimizer.step()
 
 

@@ -9,7 +9,10 @@ A convolutional variational autoencoder model.
 Conceptually the same as the vanilla VAE with the linear layers substituted for conv blocks.
 """
 
-# TODO: test batchnorm
+# TODO:
+#  test batchnorm, flatten post-conv values to increase latent space dimensions,
+#  try implementing something along the lines of LeNet (linear layers before mean, log_var)
+#  e.g. 2 conv + pooling layers, 2-3 dense layers
 
 
 class Encoder(nn.Module):
@@ -30,15 +33,15 @@ class Encoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels, out_channels // 2, kernel_size, stride),
 
-            nn.MaxPool2d(kernel_size, stride),
-
             nn.ReLU(True),
+
+            nn.MaxPool2d(kernel_size, stride),
 
             nn.Conv2d(out_channels // 2, out_channels, kernel_size, stride),
 
-            nn.MaxPool2d(kernel_size, stride),
-
             nn.ReLU(True),
+
+            nn.MaxPool2d(kernel_size, stride),
 
             nn.Conv2d(out_channels, out_channels * 2, kernel_size, stride),
 
@@ -47,6 +50,7 @@ class Encoder(nn.Module):
             nn.Conv2d(out_channels * 2, out_channels * 4, kernel_size, stride),
 
             nn.Sigmoid(),
+
         )
 
         # ((in_h - 1 * (kernel_size - 1) - 1) // stride) + 1 -- the formula for the shape of the output of a conv layer
@@ -135,7 +139,7 @@ class CVAE(nn.Module):
         :return: noise z.
         """
         epsilon = torch.randn_like(var)
-        z = mean + var * epsilon
+        z = epsilon.mul(var).add(mean)
 
         return z
 

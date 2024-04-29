@@ -15,8 +15,8 @@ Model training and inference are run on GPU.
 """
 
 
-TRAIN_ITERS = 5000
-CHECKPOINT_ITERS = 100
+TRAIN_ITERS = 200
+CHECKPOINT_ITERS = 10
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device: {device}')
@@ -28,11 +28,11 @@ transform = torchvision.transforms.Compose([
                              ])
 
 # loading the MNIST digits dataset; simultaneously separating it into train/test portions
-mnist_trainset = datasets.FashionMNIST(root='./data_femnist', train=True, download=True, transform=transform)
-mnist_testset = datasets.FashionMNIST(root='./data_fmnist', train=False, download=True, transform=transform)
+mnist_trainset = datasets.MNIST(root='./data_mnist', train=True, download=True, transform=transform)
+mnist_testset = datasets.MNIST(root='./data_mnist', train=False, download=True, transform=transform)
 
 # initializing the VAE model
-vae = VAE(28, 512, 128).to(device)
+vae = VAE(28, 512, 256).to(device)
 
 # adam optimizer
 optimizer = Adam(params=vae.parameters(), lr=0.0001)
@@ -40,7 +40,7 @@ optimizer = Adam(params=vae.parameters(), lr=0.0001)
 # the training loop
 losses = []
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, batch_size=100)
+    curr_batch = batch(mnist_trainset, batch_size=200)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
@@ -80,7 +80,7 @@ plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
 plt.show()
 
 # saving the model
-PATH = '../models/model.pt'
+PATH = '../models/vae_model.pt'
 
 torch.save({
             'epoch': TRAIN_ITERS,
