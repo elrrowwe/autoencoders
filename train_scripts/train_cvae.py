@@ -4,6 +4,8 @@ import torchvision
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.append("..")
 from models.conv_vae import (
     Encoder,
     Decoder,
@@ -38,6 +40,9 @@ transform = torchvision.transforms.Compose([
 mnist_trainset = datasets.MNIST(root='./data_mnist', train=True, download=True, transform=transform)
 mnist_testset = datasets.MNIST(root='./data_mnist', train=False, download=True, transform=transform)
 
+# split data into train / validation
+mnist_trainset, mnist_valset = torch.utils.data.random_split(mnist_trainset, [50000, 10000])
+
 # initializing the CVAE model (encoder, decoder, CVAE)
 encoder = Encoder()
 
@@ -50,6 +55,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 
 # the training loop
 losses = [1000] # a silly init value
+val_losses = [1000]
 for epoch in range(TRAIN_ITERS):
     curr_batch = batch(mnist_trainset, batch_size=100, cvae=True)
     optimizer.zero_grad()
