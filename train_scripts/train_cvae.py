@@ -3,9 +3,9 @@ from torch.optim.adam import Adam
 import torchvision
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
-
 import sys
 sys.path.append("..")
+
 from models.conv_vae import (
     Encoder,
     Decoder,
@@ -22,7 +22,7 @@ Is meant to be run on GPU.
 """
 
 
-TRAIN_ITERS = 200
+TRAIN_ITERS = 500
 CHECKPOINT_ITERS = 10
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -57,7 +57,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 losses = [1000] # a silly init value
 val_losses = [1000]
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, batch_size=200, cvae=True)
+    curr_batch = batch(mnist_trainset, batch_size=150, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:

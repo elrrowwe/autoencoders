@@ -13,49 +13,65 @@ Conceptually the same as the vanilla VAE with the linear layers substituted for 
 #  test batchnorm, flatten post-conv values to increase latent space dimensions,
 #  try implementing something along the lines of LeNet (linear layers before mean, log_var)
 #  e.g. 2 conv + pooling layers, 2-3 dense layers
+#  rewrite the docs
 
+
+"""
+LeNet architecture:
+
+5x5 2 padding conv
+2x2 2 stride avg pool
+5x5 no padding conv
+2x2 2 stride  avg pool
+
+flatten
+
+120 dense
+84 dense 
+... 
+"""
 
 class Encoder(nn.Module):
-    def __init__(self, in_channels: int = 1, out_channels: int = 32, in_shape: int = 28,
-                 kernel_size: int = 3, stride: int = 1):
+    def __init__(self,
+                 conv_kernel_size: int = 5,
+                 pool_kernel_size: int = 2,
+                 stride: int = 1,
+                 pool_stride: int = 2):
         """
         The encoder part of the CVAE model.
         Based on the feature maps created by the conv layers,
         the encoder outputs the mean, log variance of the noise distribution q.
 
-        :param in_channels: the number of channels of the input (e.g., 3 in RGB images);
-        :param out_channels: the number of output channels of the first conv layer;
-        :param kernel_size: the size of the conv "filters"/kernels;
-        :param stride: the stride in the conv layers;
         """
         super(Encoder, self).__init__()
 
+        # a LeNet-like convolutional encoder
         self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels // 2, kernel_size, stride),
+            nn.LazyConv2d(16, conv_kernel_size, stride, padding=2),
 
-            nn.ReLU(True),
+            nn.ReLU(),
 
-            nn.MaxPool2d(kernel_size, stride),
+            nn.AvgPool2d(pool_kernel_size, pool_stride),
 
-            nn.Conv2d(out_channels // 2, out_channels, kernel_size, stride),
+            nn.LazyConv2d(32, conv_kernel_size, stride),
 
-            nn.ReLU(True),
+            nn.ReLU(),
 
-            nn.MaxPool2d(kernel_size, stride),
+            nn.AvgPool2d(pool_kernel_size, pool_stride),
 
-            nn.Conv2d(out_channels, out_channels * 2, kernel_size, stride),
+            nn.Flatten(),  # should be 1x400
 
-            nn.ReLU(True),
+            nn.LazyLinear(256),
 
-            nn.Conv2d(out_channels * 2, out_channels * 4, kernel_size, stride),
+            nn.ReLU(),
 
-            nn.Sigmoid(),
+            nn.LazyLinear(128),
 
+            nn.ReLU()
         )
 
-        # ((in_h - 1 * (kernel_size - 1) - 1) // stride) + 1 -- the formula for the shape of the output of a conv layer
-        self.q_mean = nn.Linear(in_shape - (4 * 2) - (2 * 2), in_shape - (4 * 2) - (2 * 2)) # num of convlayers * 2, num of pooling layers * 2
-        self.q_log_var = nn.Linear(in_shape - (4 * 2) - (2 * 2), in_shape - (4 * 2) - (2 * 2)) # num of convlayers * 2, num of pooling layers * 2
+        self.q_mean = nn.LazyLinear(60)
+        self.q_log_var = nn.LazyLinear(60)
 
     def forward(self, inp):
         """
@@ -73,29 +89,50 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, in_channels: int = 128, out_channels: int = 32,
-                 out_channels_final: int = 1, kernel_size: int = 4, stride: int = 1):
+    def __init__(self,
+                 kernel_size: int = 5,
+                 stride: int = 1,
+                 padding: int = 0):
         super(Decoder, self).__init__()
 
         self.decoder = nn.Sequential(
-            # UnFlatten(),
-
-            nn.ConvTranspose2d(in_channels, out_channels * 2, kernel_size, stride),
+            nn.LazyLinear(128),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(out_channels * 2, out_channels, kernel_size, stride),
+            nn.LazyLinear(256),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(out_channels, out_channels // 2, kernel_size, stride),
+            nn.LazyLinear(400),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(out_channels // 2, out_channels_final, kernel_size, stride),
+            nn.Unflatten(1, (16, 5, 5)),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(16, 1, kernel_size-1, stride, padding),
 
             nn.Sigmoid(),
-
         )
 
     def forward(self, inp):

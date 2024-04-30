@@ -46,9 +46,9 @@ since the objective pushes the modelled distribution q to be as close as possibl
 """
 mean, log_var, _ = cvae.forward(torch.randn((1, 1, 28, 28)))
 var = torch.exp(0.5 * log_var)
-# z = cvae.reparameterization(mean, var)
-# z = torch.randn(1, 128, 16, 16)
-z = torch.normal(mean, var)
+z = cvae.reparameterization(mean, var)
+# z = torch.randn(16, 6, 5, 5)
+# z = torch.normal(mean, var)
 cvae.eval()
 out = cvae.inference(z)
 

@@ -16,7 +16,6 @@ class UnFlatten(nn.Module):
         [batch_size, channels, height, width]
 
         :param input: a torch tensor to be reshaped;
-        :param size: the nunber of channels of the output tensor;
         :return: the input tensor, reshaped to the desired dimensions.
         """
         return input.view(input.size(0), input.size(1), 1, 1)
