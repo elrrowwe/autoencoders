@@ -57,7 +57,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 losses = [1000] # a silly init value
 val_losses = [1000]
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, batch_size=150, cvae=True)
+    curr_batch = batch(mnist_trainset, batch_size=200, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
