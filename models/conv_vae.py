@@ -1,8 +1,6 @@
 import torch.nn as nn
 import torch
 
-from utils.unflatten import UnFlatten # for "unflattening" the input to the decoder
-
 
 """
 A convolutional variational autoencoder model.
@@ -10,26 +8,9 @@ Conceptually the same as the vanilla VAE with the linear layers substituted for 
 """
 
 # TODO:
-#  test batchnorm, flatten post-conv values to increase latent space dimensions,
-#  try implementing something along the lines of LeNet (linear layers before mean, log_var)
-#  e.g. 2 conv + pooling layers, 2-3 dense layers
+#  test batchnorm,
 #  rewrite the docs
 
-
-"""
-LeNet architecture:
-
-5x5 2 padding conv
-2x2 2 stride avg pool
-5x5 no padding conv
-2x2 2 stride  avg pool
-
-flatten
-
-120 dense
-84 dense 
-... 
-"""
 
 class Encoder(nn.Module):
     def __init__(self,
@@ -47,31 +28,37 @@ class Encoder(nn.Module):
 
         # a LeNet-like convolutional encoder
         self.encoder = nn.Sequential(
-            nn.LazyConv2d(16, conv_kernel_size, stride, padding=2),
+            nn.LazyConv2d(32, conv_kernel_size, stride, padding=2),
 
             nn.ReLU(),
 
-            nn.AvgPool2d(pool_kernel_size, pool_stride),
+            nn.MaxPool2d(pool_kernel_size, pool_stride),
 
-            nn.LazyConv2d(32, conv_kernel_size, stride),
+            nn.LazyConv2d(64, conv_kernel_size, stride),
 
             nn.ReLU(),
 
-            nn.AvgPool2d(pool_kernel_size, pool_stride),
+            nn.MaxPool2d(pool_kernel_size, pool_stride),
 
             nn.Flatten(),  # should be 1x400
+
+            nn.LazyLinear(400),
+
+            nn.ReLU(),
+
+            nn.LazyLinear(400),
+
+            nn.ReLU(),
 
             nn.LazyLinear(256),
 
             nn.ReLU(),
 
             nn.LazyLinear(128),
-
-            nn.ReLU()
         )
 
-        self.q_mean = nn.LazyLinear(60)
-        self.q_log_var = nn.LazyLinear(60)
+        self.q_mean = nn.LazyLinear(100)
+        self.q_log_var = nn.LazyLinear(100)
 
     def forward(self, inp):
         """
@@ -110,15 +97,15 @@ class Decoder(nn.Module):
 
             nn.Unflatten(1, (16, 5, 5)),
 
-            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+            nn.ConvTranspose2d(16, 32, kernel_size, stride, padding),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+            nn.ConvTranspose2d(32, 32, kernel_size, stride, padding),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+            nn.ConvTranspose2d(32, 16, kernel_size, stride, padding),
 
             nn.ReLU(),
 
@@ -176,7 +163,9 @@ class CVAE(nn.Module):
         :return: noise z.
         """
         epsilon = torch.randn_like(var)
-        z = epsilon.mul(var).add(mean)
+        # z = epsilon.mul(var).add(mean)
+
+        z = (epsilon * var) + mean
 
         return z
 

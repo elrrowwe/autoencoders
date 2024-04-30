@@ -4,7 +4,6 @@ import torchvision
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 import sys
-sys.path.append("..")
 
 from models.conv_vae import (
     Encoder,
@@ -13,6 +12,7 @@ from models.conv_vae import (
 )
 from utils.kldiv import kldiv_loss
 from utils.batch import batch
+sys.path.append("..")
 
 
 """
@@ -57,7 +57,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 losses = [1000] # a silly init value
 val_losses = [1000]
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, batch_size=200, cvae=True)
+    curr_batch = batch(mnist_trainset, batch_size=100, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
@@ -97,9 +97,9 @@ plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
 plt.show()
 
 # saving the model
-PATH = '../models/cvae_model.pt'
-PATH_encoder = '../models/encoder_model.pt'
-PATH_decoder = '../models/decoder_model.pt'
+PATH = '../models/fmnist_cvae_model.pt'
+PATH_encoder = '../models/fmnist_encoder_model.pt'
+PATH_decoder = '../models/fmnist_decoder_model.pt'
 
 torch.save({
             'epoch': TRAIN_ITERS,
