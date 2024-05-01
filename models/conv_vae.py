@@ -28,23 +28,23 @@ class Encoder(nn.Module):
 
         # a LeNet-like convolutional encoder
         self.encoder = nn.Sequential(
-            nn.LazyConv2d(32, conv_kernel_size, stride, padding=2),
-
-            nn.ReLU(),
+            nn.LazyConv2d(6, conv_kernel_size, stride, padding=2),
 
             nn.MaxPool2d(pool_kernel_size, pool_stride),
 
-            nn.LazyConv2d(64, conv_kernel_size, stride),
+            nn.ReLU(),
+
+            nn.LazyBatchNorm2d(),
+
+            nn.LazyConv2d(16, conv_kernel_size, stride),
+
+            nn.MaxPool2d(pool_kernel_size, pool_stride),
 
             nn.ReLU(),
 
-            nn.MaxPool2d(pool_kernel_size, pool_stride),
+            nn.LazyBatchNorm2d(),
 
             nn.Flatten(),  # should be 1x400
-
-            nn.LazyLinear(400),
-
-            nn.ReLU(),
 
             nn.LazyLinear(400),
 
@@ -55,10 +55,12 @@ class Encoder(nn.Module):
             nn.ReLU(),
 
             nn.LazyLinear(128),
+
+            nn.ReLU()
         )
 
-        self.q_mean = nn.LazyLinear(100)
-        self.q_log_var = nn.LazyLinear(100)
+        self.q_mean = nn.LazyLinear(60)
+        self.q_log_var = nn.LazyLinear(60)
 
     def forward(self, inp):
         """
@@ -83,39 +85,49 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
 
         self.decoder = nn.Sequential(
-            nn.LazyLinear(128),
-
-            nn.ReLU(),
-
-            nn.LazyLinear(256),
-
-            nn.ReLU(),
-
+            # nn.LazyLinear(128),
+            #
+            # nn.ReLU(),
+            #
+            # nn.LazyLinear(256),
+            #
+            # nn.ReLU(),
+            #
             nn.LazyLinear(400),
 
             nn.ReLU(),
 
             nn.Unflatten(1, (16, 5, 5)),
 
-            nn.ConvTranspose2d(16, 32, kernel_size, stride, padding),
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
 
             nn.ReLU(),
 
-            nn.ConvTranspose2d(32, 32, kernel_size, stride, padding),
-
-            nn.ReLU(),
-
-            nn.ConvTranspose2d(32, 16, kernel_size, stride, padding),
-
-            nn.ReLU(),
+            nn.LazyBatchNorm2d(),
 
             nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
 
             nn.ReLU(),
 
+            nn.LazyBatchNorm2d(),
+
             nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
 
             nn.ReLU(),
+
+            nn.LazyBatchNorm2d(),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.LazyBatchNorm2d(),
+
+            nn.ConvTranspose2d(16, 16, kernel_size, stride, padding),
+
+            nn.ReLU(),
+
+            nn.LazyBatchNorm2d(),
 
             nn.ConvTranspose2d(16, 1, kernel_size-1, stride, padding),
 

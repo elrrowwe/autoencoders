@@ -57,7 +57,7 @@ optimizer = Adam(params=cvae.parameters(), lr=0.0001)
 losses = [1000] # a silly init value
 val_losses = [1000]
 for epoch in range(TRAIN_ITERS):
-    curr_batch = batch(mnist_trainset, batch_size=100, cvae=True)
+    curr_batch = batch(mnist_trainset, batch_size=75, cvae=True)
     optimizer.zero_grad()
 
     if epoch > 0 and epoch % CHECKPOINT_ITERS == 0:
@@ -97,9 +97,9 @@ plt.title(f'Loss statistics for {TRAIN_ITERS} epochs')
 plt.show()
 
 # saving the model
-PATH = '../models/fmnist_cvae_model.pt'
-PATH_encoder = '../models/fmnist_encoder_model.pt'
-PATH_decoder = '../models/fmnist_decoder_model.pt'
+PATH = '../models/mnist_cvae_model.pt'
+PATH_encoder = '../models/mnist_encoder_model.pt'
+PATH_decoder = '../models/mnist_decoder_model.pt'
 
 torch.save({
             'epoch': TRAIN_ITERS,

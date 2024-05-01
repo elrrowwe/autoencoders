@@ -18,7 +18,7 @@ def kldiv_loss(x_pred, x_true, mean, log_var):
     :param log_var: the log variance produced by the encoder;
     :return: the loss.
     """
-    bce_loss = F.binary_cross_entropy(x_pred, x_true, reduction='sum')
+    bce_loss = F.binary_cross_entropy(x_pred.view(-1, 784), x_true.view(-1, 784), reduction='sum')
     # kldiv = -5e-4 * torch.mean(1 + log_var - mean.pow(2) - log_var.exp())
     # loss = torch.mean(bce_loss + kldiv)
 

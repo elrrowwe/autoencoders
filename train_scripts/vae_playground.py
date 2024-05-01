@@ -24,15 +24,15 @@ cvae = CVAE(encoder, decoder)
 vae = VAE(28, 512, 256)
 
 # loading the last cvae model checkpoint
-cvae_checkpoint = torch.load('../models/cvae_model.pt')
+cvae_checkpoint = torch.load('../models/mnist_cvae_model.pt')
 cvae.load_state_dict(cvae_checkpoint['model_state_dict'])
 
 # loading the cvae encoder model
-encoder_checkpoint = torch.load('../models/encoder_model.pt')
+encoder_checkpoint = torch.load('../models/mnist_encoder_model.pt')
 encoder.load_state_dict(encoder_checkpoint['model_state_dict'])
 
 # loading the cvae decoder model
-decoder_checkpoint = torch.load('../models/decoder_model.pt')
+decoder_checkpoint = torch.load('../models/mnist_decoder_model.pt')
 decoder.load_state_dict(decoder_checkpoint['model_state_dict'])
 
 # loading the vanilla vae model
